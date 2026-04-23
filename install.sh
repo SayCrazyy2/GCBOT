@@ -258,17 +258,19 @@ pip install -r "$INSTALL_DIR/requirements.txt" --quiet
 ok "Python dependencies installed."
 
 # Install / update gh copilot extension ──────────────────────────────────────
-if gh extension list 2>/dev/null | grep -q "github/gh-copilot"; then
-  ok "gh copilot extension already installed — upgrading…"
-  gh extension upgrade gh-copilot 2>/dev/null || true
+# GitHub Copilot (built-in in newer gh versions)
+if gh help copilot &>/dev/null; then
+  ok "GitHub Copilot CLI already available (built-in)."
 else
-  warn "Installing gh copilot extension…"
+  warn "GitHub Copilot not found in gh CLI."
+
   if gh auth status &>/dev/null 2>&1; then
-    gh extension install github/gh-copilot
-    ok "gh copilot extension installed."
+    warn "Attempting to install gh-copilot extension…"
+    gh extension install github/gh-copilot 2>/dev/null || \
+      warn "Failed to install gh-copilot (likely due to version conflict)."
   else
     warn "You are not logged in to GitHub CLI."
-    warn "Run 'gh auth login' after installation, then 'gh extension install github/gh-copilot'."
+    warn "Run: gh auth login"
   fi
 fi
 
